@@ -1,0 +1,28 @@
+apiVersion: trainer.kubeflow.org/v1alpha1
+kind: TrainJob
+metadata:
+  name: multikueue-hello
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: user-queue
+spec:
+  runtimeRef:
+    apiGroup: trainer.kubeflow.org
+    kind: ClusterTrainingRuntime
+    name: torch-distributed
+  trainer:
+    numNodes: 2
+    command: ["/bin/bash", "-c"]
+    args:
+      - |
+        echo "==== I am pod $HOSTNAME ===="
+        echo "PET_NODE_RANK=$PET_NODE_RANK  PET_NNODES=$PET_NNODES"
+        sleep 30
+        echo "==== done ===="
+    resourcesPerNode:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
