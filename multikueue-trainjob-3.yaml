@@ -1,7 +1,7 @@
 apiVersion: trainer.kubeflow.org/v1alpha1
 kind: TrainJob
 metadata:
-  name: multikueue-hello
+  name: multikueue-hello-3
   namespace: default
   labels:
     kueue.x-k8s.io/queue-name: user-queue
@@ -22,8 +22,8 @@ spec:
         echo "==== done ===="
     resourcesPerNode:
       requests:
-        cpu: "500m"
+        cpu: "1500m"
         memory: "512Mi"
       limits:
-        cpu: "1"
-        memory: "1Gi"                                 
+        cpu: "2"
+        memory: "1Gi"

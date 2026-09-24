@@ -13,7 +13,7 @@ spec:
   - coveredResources: ["cpu", "memory"]
     flavors:
     - name: default-flavor
-      resources:
+      resources: 
       - name: cpu
         nominalQuota: 4
       - name: memory
