@@ -1,0 +1,100 @@
+# Apply to: MANAGER only
+# Adds two pinned routes next to the existing user-queue route.
+# Reuses from manager-setup.yaml: MultiKueueCluster worker-a / worker-b, ResourceFlavor default-flavor.
+#
+#   queue-worker-a -> cq-worker-a -> ac-worker-a -> config-worker-a [worker-a]
+#   queue-worker-b -> cq-worker-b -> ac-worker-b -> config-worker-b [worker-b]
+
+# ---------------- Route to worker-a ----------------
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: MultiKueueConfig
+metadata:
+  name: config-worker-a
+spec:
+  clusters:
+  - worker-a
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: AdmissionCheck
+metadata:
+  name: ac-worker-a
+spec:
+  controllerName: kueue.x-k8s.io/multikueue
+  parameters:
+    apiGroup: kueue.x-k8s.io
+    kind: MultiKueueConfig
+    name: config-worker-a
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: cq-worker-a
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+  - coveredResources: ["cpu", "memory"]
+    flavors:
+    - name: default-flavor
+      resources:
+      - name: cpu
+        nominalQuota: 4        # = worker-a's real capacity
+      - name: memory
+        nominalQuota: 8Gi
+  admissionChecksStrategy:
+    admissionChecks:
+    - name: ac-worker-a
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: LocalQueue
+metadata:
+  namespace: default
+  name: queue-worker-a
+spec:
+  clusterQueue: cq-worker-a
+---
+# ---------------- Route to worker-b ----------------
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: MultiKueueConfig
+metadata:
+  name: config-worker-b
+spec:
+  clusters:
+  - worker-b
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: AdmissionCheck
+metadata:
+  name: ac-worker-b
+spec:
+  controllerName: kueue.x-k8s.io/multikueue
+  parameters:
+    apiGroup: kueue.x-k8s.io
+    kind: MultiKueueConfig
+    name: config-worker-b
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: ClusterQueue
+metadata:
+  name: cq-worker-b
+spec:
+  namespaceSelector: {}
+  resourceGroups:
+  - coveredResources: ["cpu", "memory"]
+    flavors:
+    - name: default-flavor
+      resources:
+      - name: cpu
+        nominalQuota: 4        # = worker-b's real capacity
+      - name: memory
+        nominalQuota: 8Gi
+  admissionChecksStrategy:
+    admissionChecks:
+    - name: ac-worker-b
+---
+apiVersion: kueue.x-k8s.io/v1beta2
+kind: LocalQueue
+metadata:
+  namespace: default
+  name: queue-worker-b
+spec:
+  clusterQueue: cq-worker-b

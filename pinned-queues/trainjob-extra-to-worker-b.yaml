@@ -1,0 +1,30 @@
+# Optional proof: a SECOND job forced to worker-b even though worker-a has plenty of room.
+# Submit to: MANAGER.
+apiVersion: trainer.kubeflow.org/v1alpha1
+kind: TrainJob
+metadata:
+  name: pinned-job-b2
+  namespace: default
+  labels:
+    kueue.x-k8s.io/queue-name: queue-worker-b
+spec:
+  runtimeRef:
+    apiGroup: trainer.kubeflow.org
+    kind: ClusterTrainingRuntime
+    name: torch-distributed
+  trainer:
+    image: busybox:1.36
+    numNodes: 2
+    command: ["/bin/sh", "-c"]
+    args:
+      - |
+        echo "==== $HOSTNAME  rank=$PET_NODE_RANK of $PET_NNODES  (pinned to worker-b, 2nd job) ===="
+        sleep 300
+        echo "==== done ===="
+    resourcesPerNode:
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
+      limits:
+        cpu: "1"
+        memory: "1Gi"
